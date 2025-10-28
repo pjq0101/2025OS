@@ -8,8 +8,13 @@
 #include <riscv.h>
 #include <stdio.h>
 #include <trap.h>
+#include <sbi.h>  // 引入sbi头文件用于关机函数
 
 #define TICK_NUM 100
+
+// 新增全局变量用于计数
+//volatile size_t ticks = 0;       // 时钟中断计数器
+static int print_count = 0;  // 打印次数计数器
 
 static void print_ticks() {
     cprintf("%d ticks\n", TICK_NUM);
@@ -130,6 +135,15 @@ void interrupt_handler(struct trapframe *tf) {
              *(3)当计数器加到100的时候，我们会输出一个`100ticks`表示我们触发了100次时钟中断，同时打印次数（num）加一
             * (4)判断打印次数，当打印次数为10时，调用<sbi.h>中的关机函数关机
             */
+            clock_set_next_event();  // 设置下次时钟中断
+            ticks++;                 // 计数器加一
+            if (ticks % TICK_NUM == 0) {  // 每100次中断打印一次
+                print_ticks();
+                print_count++;
+                if (print_count >= 10) {  // 打印10次后关机
+                    sbi_shutdown();
+                }
+            }
             break;
         case IRQ_H_TIMER:
             cprintf("Hypervisor software interrupt\n");
@@ -168,14 +182,20 @@ void exception_handler(struct trapframe *tf) {
              *(2)输出异常指令地址
              *(3)更新 tf->epc寄存器
             */
+            cprintf("Exception type:Illegal instruction\n");
+            cprintf("Illegal instruction caught at 0x%08x\n", tf->epc);
+            tf->epc += 4;  // 跳过异常指令（RISC-V指令长度为4字节）
             break;
         case CAUSE_BREAKPOINT:
-            //断点异常处理
+            // 断点异常处理
             /* LAB3 CHALLLENGE3   YOUR CODE :  */
             /*(1)输出指令异常类型（ breakpoint）
              *(2)输出异常指令地址
              *(3)更新 tf->epc寄存器
             */
+            cprintf("Exception type: breakpoint\n");
+            cprintf("ebreak caught at 0x%08x\n", tf->epc);
+            tf->epc += 4;  // 跳过断点指令
             break;
         case CAUSE_MISALIGNED_LOAD:
             break;

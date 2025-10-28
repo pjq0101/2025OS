@@ -24,16 +24,16 @@ static void buddy_system_check_easy_alloc_and_free_condition(void) {
     struct Page *p0, *p1, *p2;
     p0 = p1 = p2 = NULL;
     
-    cprintf("p0 alloc 10 pages\n");
-    p0 = alloc_pages(10);
+    cprintf("p0 alloc 15 pages\n");
+    p0 = alloc_pages(15);
     show_buddy_array(0, MAX_ORDER - 1);
     
-    cprintf("p1 alloc 10 pages\n");
-    p1 = alloc_pages(10);
+    cprintf("p1 alloc 30 pages\n");
+    p1 = alloc_pages(30);
     show_buddy_array(0, MAX_ORDER - 1);
     
-    cprintf("p2 alloc 10 pages\n");
-    p2 = alloc_pages(10);
+    cprintf("p2 alloc 70 pages\n");
+    p2 = alloc_pages(70);
     show_buddy_array(0, MAX_ORDER - 1);
     
     cprintf("p0=0x%016lx\n", p0);
@@ -48,17 +48,17 @@ static void buddy_system_check_easy_alloc_and_free_condition(void) {
     
     cprintf("CHECK EASY FREE:\n");
     cprintf("free p0...\n");
-    free_pages(p0, 10);
+    free_pages(p0, 15);
     cprintf("after free p0, nr_free=%d\n", nr_free);
     show_buddy_array(0, MAX_ORDER - 1);
     
     cprintf("free p1...\n");
-    free_pages(p1, 10);
+    free_pages(p1, 30);
     cprintf("after free p1, nr_free=%d\n", nr_free);
     show_buddy_array(0, MAX_ORDER - 1);
     
     cprintf("free p2...\n");
-    free_pages(p2, 10);
+    free_pages(p2, 70);
     cprintf("after free p2, nr_free=%d\n", nr_free);
     show_buddy_array(0, MAX_ORDER - 1);
 }
@@ -71,16 +71,16 @@ static void buddy_system_check_difficult_alloc_and_free_condition(void) {
     struct Page *p0, *p1, *p2;
     p0 = p1 = p2 = NULL;
     
-    cprintf("p0 alloc 10 pages\n");
-    p0 = alloc_pages(10);
+    cprintf("p0 alloc 15 pages\n");
+    p0 = alloc_pages(15);
     show_buddy_array(0, MAX_ORDER - 1);
     
-    cprintf("p1 alloc 50 pages\n");
-    p1 = alloc_pages(50);
+    cprintf("p1 alloc 30 pages\n");
+    p1 = alloc_pages(30);
     show_buddy_array(0, MAX_ORDER - 1);
     
-    cprintf("p2 alloc 100 pages\n");
-    p2 = alloc_pages(100);
+    cprintf("p2 alloc 70 pages\n");
+    p2 = alloc_pages(70);
     show_buddy_array(0, MAX_ORDER - 1);
     
     cprintf("p0=0x%016lx\n", p0);
@@ -95,17 +95,17 @@ static void buddy_system_check_difficult_alloc_and_free_condition(void) {
     
     cprintf("CHECK DIFFICULT FREE:\n");
     cprintf("free p0...\n");
-    free_pages(p0, 10);
+    free_pages(p0, 15);
     cprintf("after free p0, nr_free=%d\n", nr_free);
     show_buddy_array(0, MAX_ORDER - 1);
     
     cprintf("free p1...\n");
-    free_pages(p1, 50);
+    free_pages(p1, 30);
     cprintf("after free p1, nr_free=%d\n", nr_free);
     show_buddy_array(0, MAX_ORDER - 1);
     
     cprintf("free p2...\n");
-    free_pages(p2, 100);
+    free_pages(p2, 70);
     cprintf("after free p2, nr_free=%d\n", nr_free);
     show_buddy_array(0, MAX_ORDER - 1);
 }

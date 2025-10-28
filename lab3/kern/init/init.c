@@ -35,6 +35,26 @@ int kern_init(void) {
     clock_init();   // init clock interrupt
     intr_enable();  // enable irq interrupt
 
+
+
+    // 测试1：mret
+    static int illegal_test_done = 0;
+    if (!illegal_test_done) {
+        cprintf("\n=== Testing Illegal Instruction (mret) ===\n");
+        asm volatile(".word 0x30200073");  // mret 指令
+        illegal_test_done = 1;
+    }
+
+    // 测试2：ebreak
+    static int ebreak_test_done = 0;
+    if (!ebreak_test_done) {
+        cprintf("\n=== Testing Breakpoint (ebreak) ===\n");
+        asm volatile("ebreak");
+        ebreak_test_done = 1;
+    }
+
+    
+    
     /* do nothing */
     while (1)
         ;
