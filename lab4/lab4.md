@@ -88,7 +88,7 @@ struct trapframe 保存了中断/异常发生时的处理器状态，包括所�
 7. **调用 wakeup_proc()**：将新进程状态设置为 PROC_RUNNABLE<br>
 8. **返回子进程的 PID**<br>
 
- 
+
 
 错误处理<br>
 
@@ -292,7 +292,7 @@ static int init_main(void *arg) {
 
 ### 完成代码编写后，编译并运行代码：make qemu<br>
 
-![](./images/make.png)
+![](./media/make.png)
 
 运行成功。<br>
 
@@ -558,7 +558,6 @@ if (!(*current_level & PTE_V)) {
 
 3. **代码紧凑**：减少函数调用开销<br>
 
-   
 
 缺点：<br>
 
@@ -567,7 +566,7 @@ if (!(*current_level & PTE_V)) {
 3. **代码重复**：多级页表遍历中存在相似代码段<br>
 4. **灵活性不足**：调用者无法控制分配策略<br>
 
- 
+
 
 ####  **推荐的拆分方案**<br>
 
