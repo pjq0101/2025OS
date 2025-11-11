@@ -190,8 +190,22 @@ tf->epc += 4;  // 跳过异常指令（RISC-V指令长度为4字节）
 // 打印异常类型与发生地址
 cprintf("Exception type: breakpoint\n");
 cprintf("ebreak caught at 0x%08x\n", tf->epc);
-tf->epc += 4;  // 跳过断点指令
+tf->epc += 2;  // 跳过断点指令（RISC-V中ebreak指令长度为2字节）
 ```
+
+#### 测试函数
+
+```
+// 测试1：非法指令异常
+    cprintf("Testing mret (illegal instruction)...\n");
+    asm("mret");
+
+// 测试2：断点异常  
+    cprintf("Testing ebreak (breakpoint)...\n");
+    asm("ebreak");
+```
+
+
 
 ### 输出结果
 
@@ -226,6 +240,47 @@ qemu-system-riscv64 -machine virt -nographic -kernel kernel -bios none
   Exception type: breakpoint
   ebreak caught at 0xc02000be
   ```
+
+### 实验中遇到的问题与更正
+
+起初，我们以为RISC-V所有指令都是长度都是4字节，所以在异常和断点的处理当中都采用了`tf->epc += 4;`我们使用的测试函数如下：
+
+```
+// 测试1：mret
+    static int illegal_test_done = 0;
+    if (!illegal_test_done) {
+        cprintf("\n=== Testing Illegal Instruction (mret) ===\n");
+        asm volatile(".word 0x30200073");  // mret 指令
+        illegal_test_done = 1;
+    }
+// 测试2：ebreak
+    static int ebreak_test_done = 0;
+    if (!ebreak_test_done) {
+        cprintf("\n=== Testing Breakpoint (ebreak) ===\n");
+        asm volatile("ebreak");
+        ebreak_test_done = 1;
+    }
+```
+
+在此情况下，并未出现报错提示和不正常输出。
+
+在助教检查后我们得知，`ebreak`指令长度应当为2字节，所以我们检查了代码，希望找到错误的地址未产生异常输出的原因。查阅资料发现，RISC-V在编译时会将简单指令自动转换为压缩指令集，即2字节，我们使用命令`riscv64-unknown-elf-objdump -d bin/kernel > kernel_asm.txt`查看编译后的汇编代码如下：
+
+```
+ffffffffc02000c4:	30200073          	.word	0x30200073
+ffffffffc02000c8:	4785                	li	a5,1
+ffffffffc02000ca:	c01c                	sw	a5,0(s0)
+ffffffffc02000cc:	b7ed                	j	ffffffffc02000b6 <kern_init+0x62>
+ffffffffc02000ce:	00002517          	auipc	a0,0x2
+ffffffffc02000d2:	f3250513          	addi	a0,a0,-206 # ffffffffc0202000 <etext+0x4>
+ffffffffc02000d6:	046000ef          	jal	ffffffffc020011c <cprintf>
+ffffffffc02000da:	9002                	ebreak
+ffffffffc02000dc:	4785                	li	a5,1
+ffffffffc02000de:	c01c                	sw	a5,0(s0)
+ffffffffc02000e0:	b7e9                	j	ffffffffc02000aa <kern_init+0x56>
+```
+
+可以看到，`mret`指令（.word 0x30200073）为4字节，`ebreak`指令为2字节，但两个测试函数的后续指令流均被压缩为2字节，导致了在`ebreak`中`epc+4`也能跳转到有效指令位置，而不会出现地址未对齐引发的程序崩溃。所以，我们将测试函数修改为如上实现过程所示，在此情况下，`epc+4`输出了大量寄存器的当前值，但无法正常输出10次`100 ticks`，而修改为`epc+2`后，程序输出正确，问题解决。
 
 
 
