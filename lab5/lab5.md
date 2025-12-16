@@ -522,7 +522,7 @@ COW页面在页表项中清除写权限位（PTE_W）
 
 ### `ucore` 用户态进程执行状态生命周期图
 
- <img src="D:\用户态进程的执行状态生命周期图.png" alt="用户态进程的执行状态生命周期图" style="zoom: 25%;" />
+ <img src="D:\lab5\media\用户态进程的执行状态生命周期图.png" alt="用户态进程的执行状态生命周期图" style="zoom:25%;" />
 
 #### 状态说明
 
@@ -588,7 +588,7 @@ COW页面在页表项中清除写权限位（PTE_W）
 
 结果如下，显示的应用程序检测都输出ok
 
-![make grade结果](C:\Users\19612\Desktop\make grade.jpg)
+![make grade](D:\lab5\media\make grade.jpg)
 
 
 
@@ -1010,7 +1010,7 @@ int main(void)
 
 运行`make build-cowtest`启动cow，运行`make qemu`，结果如下
 
-![cow机制](C:\Users\19612\Desktop\cow机制.png)
+![cow机制](D:\lab5\media\cow机制.png)
 
 cow机制工作正常，fork时页面共享，子进程可以看到父进程的数据；子进程写入时触发 page fault，
 
@@ -1031,7 +1031,7 @@ cow机制工作正常，fork时页面共享，子进程可以看到父进程的�
 Reading symbols from obj/__user_exit.out
 ```
 
-![图片1](C:\Users\19612\Desktop\图片1.png)
+![图片1](D:\lab5\media\图片1.png)
 
 **有效的断点设置** 
 
@@ -1062,7 +1062,7 @@ a4       0x0   0
 a5       0x0   0
 ```
 
-![图片2](C:\Users\19612\Desktop\图片2.png)
+![图片2](D:\lab5\media\图片2.png)
 
 **断点2**：执行ecall后进入内核
 
@@ -1080,7 +1080,7 @@ scause     0x8  8        # 异常原因：用户态ecall
 sstatus    0x8000000000046020 -9223372036854489056
 ```
 
-![图片3](C:\Users\19612\Desktop\图片3.png)
+![图片3](D:\lab5\media\图片3.png)
 
 **断点3**：do_fork函数
 
@@ -1102,7 +1102,7 @@ Breakpoint 7, do_fork (clone_flags=0, stack=2147483456, tf=0xffffffffc04bbee0)
 "Creating child process..."
 ```
 
-![图片4](C:\Users\19612\Desktop\图片4.png)
+![图片4](D:\lab5\media\图片4.png)
 
 **断点4**：返回用户态后
 
@@ -1132,7 +1132,7 @@ pc       0x800108  0x800108 <syscall+48> # 返回地址正确
 a0       0x4   4             # 返回值
 ```
 
-![图片5](C:\Users\19612\Desktop\图片5.png)
+![图片5](D:\lab5\media\图片5.png)
 
  **完整的系统调用流程**
 
@@ -1257,3 +1257,31 @@ continue
 4. **系统调用流程**：
 
 用户程序 → `syscall`封装 → `ecall` → 内核中断处理 → `syscall`分发 → 具体处理(do_fork) → `sret`返回 → 用户程序
+
+
+
+## 分支任务：`gdb` 调试页表查询过程
+
+![图片6](D:\lab5\media\图片6.png)
+
+![图片7](D:\lab5\media\图片7.png)
+
+1. **成功捕获访存指令**
+
+找到了 `sd ra,8(sp)` 指令（地址 `0xffffffffc02000ee`）
+
+成功设置了断点并命中
+
+2. **观察到成功的访存操作**
+
+虚拟地址：`0xffffffffc0204ff8`
+
+操作：存储 `ra` 寄存器值到栈
+
+结果：成功执行，数据验证正确
+
+3. **推断出页表翻译行为**
+
+`TLB`可能命中（因为内核栈地址通常已被访问过）
+
+虚拟→物理地址翻译由硬件/`QEMU`透明完成
